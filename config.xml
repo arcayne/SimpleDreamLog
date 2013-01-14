@@ -4,7 +4,7 @@
         id		   = "com.arcayne.free.utility.simpledreamlog"
         version 	= "1.0.0">
 
-   <name>Where I parked my car</name>
+   <name>Simple dream log</name>
 
    <description>"Simple dream log" is an application for mobile devices that let you log your dreams.</description>
 
