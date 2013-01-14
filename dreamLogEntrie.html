@@ -19,31 +19,62 @@
       </script>
    </head>
    <body>
-      <div id="Log the dream-page" data-role="page">
-         <header data-role="header">
-            <h1>Log your dream</h1>
-         </header>
-         <ul class='tabs'>
-		    <li><a href='#tab1'>Write it down</a></li>
-		    <li><a href='#tab2'>Add a drawing</a></li>
-		    <li><a href='#tab3'>Details & Categorization</a></li>
-		</ul>
-		<div id='tab1'>
-		    <p>Write it down before you wake up!</p>
-		    <div id="edit" contenteditable="true">
-			. . . 
-			</div>
-		</div>
-		<div id='tab2'>
-		    <p>Can you draw it?</p>
-		</div>
-		<div id='tab3'>
-		    <p>Let's give some more detail so it will be easier to get meaning</p>
-		</div>
-				
-		<input type="button" value="Save my dream" onclick="saveEdits()"/>
-		<div id="update"> - Edit the text and click to save for next time</div>
-		
+         <div data-role="page" id="page1">
+            <div data-role="content">
+                <div id="dreamInfo" data-role="collapsible-set" data-theme="b" data-content-theme="b">
+                    <div data-role="collapsible" data-collapsed="false">
+                        <h3>
+                            Wrtie it down
+                        </h3>
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup" data-mini="true">
+                                <label for="dreamTitle">
+                                    Dream title
+                                </label>
+                                <input name="dreamTitle" id="dreamTitle" placeholder="" value="" type="text" />
+                            </fieldset>
+                        </div>
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <label for="dreamLog">
+                                    Dream log
+                                </label>
+                                <textarea name="dreamLog" id="dreamLog" placeholder="">
+                                </textarea>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div data-role="collapsible" data-collapsed="false">
+                        <h3>
+                            Draw it
+                        </h3>
+                    </div>
+                    <div data-role="collapsible" data-collapsed="false">
+                        <h3>
+                            Categorization
+                        </h3>
+                        <div data-role="fieldcontain">
+                            <label for="dreamType">
+                                Non waking reality type:
+                            </label>
+                            <select id="dreamType" name="dreamType" data-theme="b">
+                                <option value="dream">
+                                    Dream
+                                </option>
+                                <option value="innerDance">
+                                    Inner Dance
+                                </option>
+                                <option value="meditation">
+                                    Meditation
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <input id="dreamSave" type="submit" data-theme="b" value="Save my dream" onclick="saveEdits() />
+                	<div id="update"> - Edit the text and click to save for next time</div>
+            </div>           
+        </div>	
          <footer data-role="footer">
             <h3>Arcayne Studios</h3>
             <a href="aurelio.html" data-icon="info" data-iconpos="notext" class="ui-btn-right">Credits</a>
