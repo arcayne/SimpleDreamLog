@@ -19,28 +19,29 @@
       </script>
    </head>
    <body>
+   		
          <div data-role="page" id="page1">
+         <header data-role="header">
+            <a href="#" data-icon="back" data-rel="back" data-iconpos="notext" title="Go back">Back</a>
+            <h1>Record new dream</h1>
+         </header>
+         
             <div data-role="content">
                 <div id="dreamInfo" data-role="collapsible-set" data-theme="b" data-content-theme="b">
                     <div data-role="collapsible" data-collapsed="false">
                         <h3>
-                            Wrtie it down
+                            Write it down
                         </h3>
                         <div data-role="fieldcontain">
                             <fieldset data-role="controlgroup" data-mini="true">
-                                <label for="dreamTitle">
-                                    Dream title
-                                </label>
+                                <label for="dreamTitle">Dream title</label>
                                 <input name="dreamTitle" id="dreamTitle" placeholder="" value="" type="text" />
                             </fieldset>
                         </div>
                         <div data-role="fieldcontain">
                             <fieldset data-role="controlgroup">
-                                <label for="dreamLog">
-                                    Dream log
-                                </label>
-                                <textarea name="dreamLog" id="dreamLog" placeholder="">
-                                </textarea>
+                                <label for="dreamLog">Dream log</label>
+                                <textarea name="dreamLog" id="dreamLog" placeholder=""></textarea>
                             </fieldset>
                         </div>
                     </div>
@@ -71,7 +72,7 @@
                         </div>
                     </div>
                 </div>
-                <input id="dreamSave" type="submit" data-theme="b" value="Save my dream" onclick="saveEdits() />
+                <input id="dreamSave" type="button" data-theme="b" value="Save my dream" onclick="saveEdits() />
                 	<div id="update"> - Edit the text and click to save for next time</div>
             </div>           
         </div>	

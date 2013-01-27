@@ -245,7 +245,7 @@ function createPositionsHistoryList(idElement, positions)
 function saveEdits() 
 {
 		//get the editable element
-		var editElem = document.getElementById("edit");
+		var editElem = document.getElementById("dreamSave");
 		
 		//get the edited element content
 		var userVersion = editElem.innerHTML;
