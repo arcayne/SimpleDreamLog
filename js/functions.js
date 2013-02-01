@@ -45,6 +45,85 @@ function urlParam(name)
 }
 
 /**
+ * Create the positions' history list
+ */
+function createPositionsHistoryList(idElement, positions) {
+    if (positions == null || positions.length == 0)
+        return;
+
+    $('#' + idElement).empty();
+    var $listElement, $linkElement, dateTime;
+    for (var i = 0; i < positions.length; i++) {
+        $listElement = $('<li>');
+        $linkElement = $('<a>');
+        $linkElement
+        .attr('href', '#')
+        .click(
+           function () {
+               if (checkRequirements() === false)
+                   return false;
+
+               $.mobile.changePage(
+                  'map.html',
+                  {
+                      data: {
+                          requestType: 'get',
+                          index: $(this).closest('li').index()
+                      }
+                  }
+               );
+           }
+        );
+
+        if (positions[i].address == '' || positions[i].address == null)
+            $linkElement.text('Address not found');
+        else
+            $linkElement.text(positions[i].address);
+
+        dateTime = new Date(positions[i].datetime);
+        $linkElement.text(
+           $linkElement.text() + ' @ ' +
+           dateTime.toLocaleDateString() + ' ' +
+           dateTime.toLocaleTimeString()
+        );
+
+        // Append the link to the <li> element
+        $listElement.append($linkElement);
+
+        $linkElement = $('<a>');
+        $linkElement.attr('href', '#')
+        .text('Delete')
+        .click(
+           function () {
+               var position = new Position();
+               var oldLenght = position.getPositions().length;
+               var $parentUl = $(this).closest('ul');
+
+               position.deletePosition($(this).closest('li').index());
+               if (oldLenght == position.getPositions().length + 1) {
+                   $(this).closest('li').remove();
+                   $parentUl.listview('refresh');
+               }
+               else {
+                   navigator.notification.alert(
+                      'Position not deleted. Something gone wrong so please try again.',
+                      function () { },
+                      'Error'
+                   );
+               }
+
+           }
+        );
+        // Append the link to the <li> element
+        $listElement.append($linkElement);
+
+        // Append the <li> element to the <ul> element
+        $('#' + idElement).append($listElement);
+    }
+    $('#' + idElement).listview('refresh');
+}
+
+/**
  * Initialize the application
  */
 function initApplication()
@@ -153,99 +232,125 @@ function initApplication()
    );
 }
 
+/*************************************************************
+* OLD APP
+*/
 
-/**
- * Create the positions' history list
- */
-function createPositionsHistoryList(idElement, positions)
-{
-   if (positions == null || positions.length == 0)
-      return;
+var dbShell;
 
-   $('#' + idElement).empty();
-   var $listElement, $linkElement, dateTime;
-   for(var i = 0; i < positions.length; i++)
-   {
-      $listElement = $('<li>');
-      $linkElement = $('<a>');
-      $linkElement
-      .attr('href', '#')
-      .click(
-         function()
-         {
-            if (checkRequirements() === false)
-               return false;
-
-            $.mobile.changePage(
-               'map.html',
-               {
-                  data: {
-                     requestType: 'get',
-                     index: $(this).closest('li').index()
-                  }
-               }
-            );
-         }
-      );
-
-      if (positions[i].address == '' || positions[i].address == null)
-         $linkElement.text('Address not found');
-      else
-         $linkElement.text(positions[i].address);
-
-      dateTime = new Date(positions[i].datetime);
-      $linkElement.text(
-         $linkElement.text() + ' @ ' +
-         dateTime.toLocaleDateString() + ' ' +
-         dateTime.toLocaleTimeString()
-      );
-
-      // Append the link to the <li> element
-      $listElement.append($linkElement);
-
-      $linkElement = $('<a>');
-      $linkElement.attr('href', '#')
-      .text('Delete')
-      .click(
-         function()
-         {
-            var position = new Position();
-            var oldLenght = position.getPositions().length;
-            var $parentUl = $(this).closest('ul');
-
-            position.deletePosition($(this).closest('li').index());
-            if (oldLenght == position.getPositions().length + 1)
-            {
-               $(this).closest('li').remove();
-               $parentUl.listview('refresh');
-            }
-            else
-            {
-               navigator.notification.alert(
-                  'Position not deleted. Something gone wrong so please try again.',
-                  function(){},
-                  'Error'
-               );
-            }
-
-         }
-      );
-      // Append the link to the <li> element
-      $listElement.append($linkElement);
-
-      // Append the <li> element to the <ul> element
-      $('#' + idElement).append($listElement);
-   }
-   $('#' + idElement).listview('refresh');
+function doLog(s) {
+    
+    setTimeout(function(){
+        console.log(s);
+    }, 3000);
+    
 }
+
+function dbErrorHandler(err) {
+    alert("DB Error: " + err.message + "\nCode=" + err.code);
+}
+
+function phoneReady() {
+    doLog("phoneReady");
+    //First, open our db
+
+    dbShell = window.openDatabase("SimpleDreamLog", 2, "SimpleDreamLog", 1000000);
+    doLog("db was opened");
+    //run transaction to create initial tables
+    dbShell.transaction(setupTable, dbErrorHandler, getEntries);
+    doLog("ran setup");
+}
+
+//I just create our initial table - all one of em
+function setupTable(tx) {
+    doLog("before execute sql...");
+    tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
+    doLog("after execute sql...");
+}
+
+//I handle getting entries from the db
+function getEntries() {
+
+    //doLog("get entries");
+    dbShell.transaction(function (tx) {
+        tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
+    }, dbErrorHandler);
+}
+
+
+function renderEntries(tx, results) {
+    doLog("render entries");
+    if (results.rows.length == 0) {
+        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
+    } else {
+        var s = "";
+        for (var i = 0; i < results.rows.length; i++) {
+            s += "<li><a href='edit.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
+        }
+        $("#noteTitleList").html(s);
+        $("#noteTitleList").listview("refresh");
+    }
+}
+
+
+function init() {
+    document.addEventListener("deviceready", phoneReady, false);
+
+    //handle form submission of a new/old note
+    $("#editDreamForm").live("submit", function (e) {
+        var data = {
+            title: $("#dreamTitle").val(),
+            body: $("#dreamBody").val(),
+            id: $("#dreamId").val()
+        };
+        savedreamToDB(data, function () {
+            $.mobile.changePage("index.html", { transition: "pop" });
+        });
+        e.preventDefault();
+    });
+
+    //will run after initial show - handles regetting the list
+  /*  $("#homePage").live("pageshow", function () {
+        getEntries();
+    });*/
+
+    //edit page logic needs to know to get old record (possible)
+   /* $("#editPage").live("pageshow", function () {
+        //get the location - it is a hash - got to be a better way
+        var loc = window.location.hash;
+        if (loc.indexOf("?") >= 0) {
+            var qs = loc.substr(loc.indexOf("?") + 1, loc.length);
+            var noteId = qs.split("=")[1];
+            //load the values
+            $("#editFormSubmitButton").attr("disabled", "disabled");
+            dbShell.transaction(
+                function (tx) {
+                    tx.executeSql("select id,title,body from dreams where id=?", [noteId], function (tx, results) {
+                        $("#noteId").val(results.rows.item(0).id);
+                        $("#noteTitle").val(results.rows.item(0).title);
+                        $("#noteBody").val(results.rows.item(0).body);
+                        $("#editFormSubmitButton").removeAttr("disabled");
+                    });
+                }, dbErrorHandler);
+
+        } else {
+            $("#editFormSubmitButton").removeAttr("disabled");
+        }
+    });*/
+}
+
 
 /**
  * Lets save the dream
  */
-function saveEdits() 
+
+/*
+function saveDream()
 {
+    doLog("Into saveDream");
+
 		//get the editable element
-		var editElem = document.getElementById("dreamSave");
+    var editElem = document.getElementById("editDreamForm");
 		
 		//get the edited element content
 		var userVersion = editElem.innerHTML;
@@ -254,5 +359,37 @@ function saveEdits()
 		localStorage.userEdits = userVersion;
 		
 		//write a confirmation to the user
-		document.getElementById("update").innerHTML="Edits saved!";
+    //document.getElementById("update").innerHTML = "Edits saved!";
+    
+		var data = {
+		    title: $("#dreamTitle").val(),
+		    body: $("#dreamBody").val(),
+		    id: $("#dreamId").val()
+		};
+
+		doLog("The dream is: " + data);
+
+		savedreamToDB(data, function () {
+		    $.mobile.changePage("index.html", { transition: "pop" });
+		});
+
+}*/
+
+function savedreamToDB(dream, cb) {
+    
+    doLog("Going to record dream " + dream);
+
+    //Sometimes you may want to jot down something quickly....
+    if (dream.title == "") dream.title = "[No Title]";
+    dbShell.transaction(function (tx) {
+        if (dream.id == "") tx.executeSql("insert into dreams(title,body,updated) values(?,?,?)", [dream.title, dream.body, new Date()]);
+        else tx.executeSql("update dreams set title=?, body=?, updated=? where id=?", [dream.title, dream.body, new Date(), dream.id]);
+    }, dbErrorHandler, cb);
+}
+
+//I just create our initial table - all one of em
+function setupTable(tx) {
+    
+    doLog("Going to create the table if it dosent exist");
+     tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
 }
