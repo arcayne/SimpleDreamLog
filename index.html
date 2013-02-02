@@ -21,10 +21,16 @@
     <body onload="init();">
         
 
-        <div id="welcome-page" data-role="page">
+        <div id="homePage" data-role="page">
             <header data-role="header">
                 <h1>Simple dream log</h1>
             </header>
+            
+            <div data-role="content" id="mainContent">	
+		        <ul data-role="listview" id="dreamTitleList"></ul>
+	        </div>
+            
+
             <div id="content" data-role="content">
                 <p>
                     Simple dream log let save a log of your dreams.

@@ -310,12 +310,12 @@ function init() {
     });
 
     //will run after initial show - handles regetting the list
-  /*  $("#homePage").live("pageshow", function () {
+    $("#homePage").live("pageshow", function () {
         getEntries();
-    });*/
+    });
 
     //edit page logic needs to know to get old record (possible)
-   /* $("#editPage").live("pageshow", function () {
+    $("#editDream").live("pageshow", function () {
         //get the location - it is a hash - got to be a better way
         var loc = window.location.hash;
         if (loc.indexOf("?") >= 0) {
@@ -336,7 +336,7 @@ function init() {
         } else {
             $("#editFormSubmitButton").removeAttr("disabled");
         }
-    });*/
+    });
 }
 
 
