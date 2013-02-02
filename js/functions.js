@@ -271,7 +271,7 @@ function setupTable(tx) {
 //I handle getting entries from the db
 function getEntries() {
 
-    //doLog("get entries");
+    doLog("get entries");
     dbShell.transaction(function (tx) {
         tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
     }, dbErrorHandler);
