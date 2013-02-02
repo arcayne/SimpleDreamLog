@@ -285,10 +285,10 @@ function renderEntries(tx, results) {
     } else {
         var s = "";
         for (var i = 0; i < results.rows.length; i++) {
-            s += "<li><a href='edit.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
+            s += "<li><a href='dreamLogEntrie.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
         }
-        $("#noteTitleList").html(s);
-        $("#noteTitleList").listview("refresh");
+        $("#dreamTitleList").html(s);
+        $("#dreamTitleList").listview("refresh");
     }
 }
 
@@ -296,7 +296,7 @@ function renderEntries(tx, results) {
 function init() {
     document.addEventListener("deviceready", phoneReady, false);
 
-    //handle form submission of a new/old note
+    //handle form submission of a new/old dream
     $("#editDreamForm").live("submit", function (e) {
         var data = {
             title: $("#dreamTitle").val(),
@@ -317,18 +317,18 @@ function init() {
     //edit page logic needs to know to get old record (possible)
     $("#editDream").live("pageshow", function () {
         //get the location - it is a hash - got to be a better way
-        var loc = window.location.hash;
+        var loc = $(this).data("url");
         if (loc.indexOf("?") >= 0) {
             var qs = loc.substr(loc.indexOf("?") + 1, loc.length);
-            var noteId = qs.split("=")[1];
+            var dreamId = qs.split("=")[1];
             //load the values
             $("#editFormSubmitButton").attr("disabled", "disabled");
             dbShell.transaction(
                 function (tx) {
-                    tx.executeSql("select id,title,body from dreams where id=?", [noteId], function (tx, results) {
-                        $("#noteId").val(results.rows.item(0).id);
-                        $("#noteTitle").val(results.rows.item(0).title);
-                        $("#noteBody").val(results.rows.item(0).body);
+                    tx.executeSql("select id,title,body from dreams where id=?", [dreamId], function (tx, results) {
+                        $("#dreamId").val(results.rows.item(0).id);
+                        $("#dreamTitle").val(results.rows.item(0).title);
+                        $("#dreamBody").val(results.rows.item(0).body);
                         $("#editFormSubmitButton").removeAttr("disabled");
                     });
                 }, dbErrorHandler);
@@ -377,7 +377,7 @@ function saveDream()
 
 function savedreamToDB(dream, cb) {
     
-    doLog("Going to record dream " + dream);
+    doLog("Going to record dream ");
 
     //Sometimes you may want to jot down something quickly....
     if (dream.title == "") dream.title = "[No Title]";

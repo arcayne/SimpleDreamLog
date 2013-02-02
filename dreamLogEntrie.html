@@ -1,22 +1,4 @@
-<!DOCTYPE html>
-<html>
-   <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Simple dream log</title>
-      <link rel="stylesheet" href="css/jquery.mobile-1.2.0.min.css" type="text/css" media="all" />
-      <link rel="stylesheet" href="css/style.css" type="text/css" media="all" />
-      <script src="js/jquery-1.8.3.min.js"></script>
-      <script src="js/jquery.mobile.config.js"></script>
-      <script src="js/jquery.mobile-1.2.0.min.js"></script>
-      <script src="js/cordova-2.0.0.js"></script>
-      <script src="js/functions.js"></script>
-      <script>
-         $(document).one('deviceready', initApplication);
-      </script>
-   </head>
-   <body>
-   		
+
        <div data-role="page" id="editDream">
            
            <div data-role="header">
@@ -31,42 +13,16 @@
                        <div data-role="collapsible" data-collapsed="false">
                            <h3>Write it down</h3>
                            <div data-role="fieldcontain">
-                               <fieldset data-role="controlgroup" data-mini="true">
+                               <div data-role="controlgroup" data-mini="true">
                                    <label for="dreamTitleLabel">Dream title</label>
-                                   <input name="dreamTitle" id="dreamTitle" placeholder="" value="" type="text" />
-                               </fieldset>
+                                   <input name="dreamTitle" id="dreamTitle" type="text" />
+                               </div>
                            </div>
                            <div data-role="fieldcontain">
-                               <fieldset data-role="controlgroup">
+                               <div data-role="controlgroup">
                                    <label for="dreamBodyLabel">Dream log</label>
-                                   <textarea name="dreamBody" id="dreamBody" placeholder=""></textarea>
-                               </fieldset>
-                           </div>
-                       </div>
-                       <div data-role="collapsible" data-collapsed="false">
-                           <h3>
-                               Draw it
-                           </h3>
-                       </div>
-                       <div data-role="collapsible" data-collapsed="false">
-                           <h3>
-                               Categorization
-                           </h3>
-                           <div data-role="fieldcontain">
-                               <label for="dreamType">
-                                   Non waking reality type:
-                               </label>
-                               <select id="dreamType" name="dreamType" data-theme="b">
-                                   <option value="dream">
-                                       Dream
-                                   </option>
-                                   <option value="innerDance">
-                                       Inner Dance
-                                   </option>
-                                   <option value="meditation">
-                                       Meditation
-                                   </option>
-                               </select>
+                                   <textarea name="dreamBody" id="dreamBody"></textarea>
+                               </div>
                            </div>
                        </div>
                    </div>
@@ -82,5 +38,3 @@
 	        </div><!-- /footer -->
        
        </div>           
-   </body>
-</html>
