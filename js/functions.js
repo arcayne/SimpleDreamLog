@@ -248,6 +248,7 @@ function doLog(s) {
 
 function dbErrorHandler(err) {
     alert("DB Error: " + err.message + "\nCode=" + err.code);
+    doLog("dbErrorHandler DB Error: " + err.message + "\nCode=" + err.code);
 }
 
 function phoneReady() {
@@ -271,10 +272,18 @@ function setupTable(tx) {
 //I handle getting entries from the db
 function getEntries() {
 
-    doLog("get entries");
-    dbShell.transaction(function (tx) {
-        tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
-    }, dbErrorHandler);
+    try {
+        
+        doLog("get entries");
+        dbShell.transaction(function (tx) {
+            tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
+        }, dbErrorHandler);
+            
+    } catch(e) {
+        doLog("getEntries => " + e.toString);
+    } 
+
+    
 }
 
 
@@ -296,15 +305,24 @@ function renderEntries(tx, results) {
 function init() {
     document.addEventListener("deviceready", phoneReady, false);
 
+    Parse.initialize("UVlewktikiK5VltsryjmuxJKyKICSgjcRNNulfFj", "g8pBOeam9isU4txJuWzewaPZJOYhMYcuTzRe5E9f");
+
+    var TestObject = Parse.Object.extend("dream");
+    var testObject = new TestObject();
+    testObject.save({ title: "new title from Parse" }, {
+        success: function (object) {
+            alert("yay! it worked");
+        }
+    });
+
     //handle form submission of a new/old dream
     $("#editDreamForm").live("submit", function (e) {
-        var data = {
-            title: $("#dreamTitle").val(),
-            body: $("#dreamBody").val(),
-            id: $("#dreamId").val()
+        var data = {title: $("#dreamTitle").val(),
+                    body: $("#dreamBody").val(),
+                    id: $("#dreamId").val()
         };
         savedreamToDB(data, function () {
-            $.mobile.changePage("index.html", { transition: "pop" });
+            $.mobile.changePage("index.html", { transition: "slide" });
         });
         e.preventDefault();
     });
@@ -392,4 +410,15 @@ function setupTable(tx) {
     
     doLog("Going to create the table if it dosent exist");
      tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
+}
+
+
+//Think to Organize this JS file
+
+function online() {
+    //return false;
+    //PG
+    return PhoneGap.online;
+    //No PG . . .
+    return navigator.onLine;
 }
