@@ -123,9 +123,121 @@ function createPositionsHistoryList(idElement, positions) {
     $('#' + idElement).listview('refresh');
 }
 
+
+/*************************************************************
+* OLD APP
+*/
+
+var dbShell;
+
+function doLog(s) {
+    
+    setTimeout(function(){
+        console.log(s);
+    }, 3000);
+    
+}
+
+
+//Wrapper for alert so I can dynamically use PhoneGap alert's on device
+function doAlert(str, cb) {
+    if (cb) cb();
+}
+
+function dbErrorHandler(err) {
+    //alert("DB Error: " + err.message + "\nCode=" + err.code);
+
+    try {
+        doLog("dbErrorHandler WebSql Error: " + err.message + "\nCode=" + err.code);
+    } catch (e) {
+        doLog("dbErrorHandler Parse Error: " + err);
+    }
+}
+
+function phoneReady() {
+    doLog("phoneReady");
+    //First, open our db
+
+    dbShell = window.openDatabase("SimpleDreamLog", 2, "SimpleDreamLog", 1000000);
+    doLog("db was opened");
+    //run transaction to create initial tables
+    dbShell.transaction(setupTable, dbErrorHandler, getEntries);
+    doLog("ran setup");
+}
+
+//I just create our initial table - all one of em
+function setupTable(tx) {
+    doLog("before execute sql...");
+    tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
+    doLog("after execute sql...");
+}
+
+//I handle getting entries from the db
+function getEntries() {
+        if (online)
+        {
+            doLog("Going to get entries from Parse");
+            var DreamObject = Parse.Object.extend("dream");
+            
+            var query = new Parse.Query(DreamObject);
+            query.find({
+                success: function (results) {
+                    renderParseEntries(results);
+                },
+                error: dbErrorHandler
+            });
+
+        }
+        else {
+            doLog("get entries");
+            dbShell.transaction(function (tx) {
+                tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
+            }, dbErrorHandler);
+        }
+}
+
+function renderParseEntries(results) {
+    doLog("render entries");
+    if (results.length == 0) {
+        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
+    } else {
+        var s = "";
+        for (var i = 0, len = results.length; i < len; i++) {
+            var result = results[i];
+           // doLog(result.id);
+            //doLog(result.objectId);
+            /*s += '<p>';
+            s += '<b>ID:</b> ' + result.id + '<br/>';
+            s += 'Created: ' + result.createdAt + '<br/>';
+            s += 'Title: ' + result.attributes.title + '<br/>';
+            s += 'Description: ' + result.attributes.description + '<br/>';
+            s += '</p>';*/
+            
+            s += "<li><a href='dreamLogEntrie.html?id=" + result.id + "'>" + result.attributes.title + "</a></li>";
+        }
+        $("#dreamTitleList").html(s);
+        $("#dreamTitleList").listview("refresh");
+    }
+}
+
+function renderEntries(tx, results) {
+    doLog("render entries");
+    if (results.rows.length == 0) {
+        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
+    } else {
+        var s = "";
+        for (var i = 0; i < results.rows.length; i++) {
+            s += "<li><a href='dreamLogEntrie.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
+        }
+        $("#dreamTitleList").html(s);
+        $("#dreamTitleList").listview("refresh");
+    }
+}
+
 /**
  * Initialize the application
  */
+/*
 function initApplication()
 {
    $('#set-car-position, #find-car').click(function() {
@@ -231,90 +343,14 @@ function initApplication()
       }
    );
 }
-
-/*************************************************************
-* OLD APP
 */
 
-var dbShell;
 
-function doLog(s) {
-    
-    setTimeout(function(){
-        console.log(s);
-    }, 3000);
-    
-}
-
-function dbErrorHandler(err) {
-    alert("DB Error: " + err.message + "\nCode=" + err.code);
-    doLog("dbErrorHandler DB Error: " + err.message + "\nCode=" + err.code);
-}
-
-function phoneReady() {
-    doLog("phoneReady");
-    //First, open our db
-
-    dbShell = window.openDatabase("SimpleDreamLog", 2, "SimpleDreamLog", 1000000);
-    doLog("db was opened");
-    //run transaction to create initial tables
-    dbShell.transaction(setupTable, dbErrorHandler, getEntries);
-    doLog("ran setup");
-}
-
-//I just create our initial table - all one of em
-function setupTable(tx) {
-    doLog("before execute sql...");
-    tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
-    doLog("after execute sql...");
-}
-
-//I handle getting entries from the db
-function getEntries() {
-
-    try {
-        
-        doLog("get entries");
-        dbShell.transaction(function (tx) {
-            tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
-        }, dbErrorHandler);
-            
-    } catch(e) {
-        doLog("getEntries => " + e.toString);
-    } 
-
-    
-}
-
-
-function renderEntries(tx, results) {
-    doLog("render entries");
-    if (results.rows.length == 0) {
-        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
-    } else {
-        var s = "";
-        for (var i = 0; i < results.rows.length; i++) {
-            s += "<li><a href='dreamLogEntrie.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
-        }
-        $("#dreamTitleList").html(s);
-        $("#dreamTitleList").listview("refresh");
-    }
-}
-
-
-function init() {
+function initApplication() {
     document.addEventListener("deviceready", phoneReady, false);
 
     Parse.initialize("UVlewktikiK5VltsryjmuxJKyKICSgjcRNNulfFj", "g8pBOeam9isU4txJuWzewaPZJOYhMYcuTzRe5E9f");
-
-    var TestObject = Parse.Object.extend("dream");
-    var testObject = new TestObject();
-    testObject.save({ title: "new title from Parse" }, {
-        success: function (object) {
-            alert("yay! it worked");
-        }
-    });
-
+    
     //handle form submission of a new/old dream
     $("#editDreamForm").live("submit", function (e) {
         var data = {title: $("#dreamTitle").val(),
@@ -341,19 +377,41 @@ function init() {
             var dreamId = qs.split("=")[1];
             //load the values
             $("#editFormSubmitButton").attr("disabled", "disabled");
-            dbShell.transaction(
-                function (tx) {
-                    tx.executeSql("select id,title,body from dreams where id=?", [dreamId], function (tx, results) {
-                        $("#dreamId").val(results.rows.item(0).id);
-                        $("#dreamTitle").val(results.rows.item(0).title);
-                        $("#dreamBody").val(results.rows.item(0).body);
-                        $("#editFormSubmitButton").removeAttr("disabled");
-                    });
-                }, dbErrorHandler);
+
+            if (online) {
+                getDreamById(dreamId);
+            } else
+            {
+                dbShell.transaction(
+                    function(tx) {
+                        tx.executeSql("select id,title,body from dreams where id=?", [dreamId], function(tx, results) {
+                            $("#dreamId").val(results.rows.item(0).id);
+                            $("#dreamTitle").val(results.rows.item(0).title);
+                            $("#dreamBody").val(results.rows.item(0).body);
+                            $("#editFormSubmitButton").removeAttr("disabled");
+                        });
+                    }, dbErrorHandler);
+            }
 
         } else {
             $("#editFormSubmitButton").removeAttr("disabled");
         }
+    });
+}
+
+function getDreamById(id) {
+    doLog("going to get getDreamById by id : " + id);
+    var DreamObject = Parse.Object.extend("dream");
+    var query = new Parse.Query(DreamObject);
+    
+    query.get(id,{
+        success: function (result) {
+            $("#dreamId").val(result.id);
+            $("#dreamTitle").val(result.get("title"));
+            $("#dreamBody").val(result.get("description"));
+            $("#editFormSubmitButton").removeAttr("disabled");
+        },
+        error: dbErrorHandler
     });
 }
 
@@ -394,15 +452,50 @@ function saveDream()
 }*/
 
 function savedreamToDB(dream, cb) {
-    
-    doLog("Going to record dream ");
+    if (online) {
+        //NEW DREAM => INSERT
+        if (dream.id == "")
+        {
+            doLog("Going to record dream online");
+            var DreamObject = Parse.Object.extend("dream");
+            var dreamObject = new DreamObject();
+            dreamObject.save({ title: dream.title, description: dream.body }, {
+                success: function (object) {
+                    alert("yay! it worked");
+                }
+            });
+        }
+        else {//UPDATE
+            // Create the object.
+            var Dream = Parse.Object.extend("dream");
+            var dreamToUpdate = new Dream();
 
-    //Sometimes you may want to jot down something quickly....
-    if (dream.title == "") dream.title = "[No Title]";
-    dbShell.transaction(function (tx) {
-        if (dream.id == "") tx.executeSql("insert into dreams(title,body,updated) values(?,?,?)", [dream.title, dream.body, new Date()]);
-        else tx.executeSql("update dreams set title=?, body=?, updated=? where id=?", [dream.title, dream.body, new Date(), dream.id]);
-    }, dbErrorHandler, cb);
+            dreamToUpdate.id = dream.id;
+            //dreamToUpdate.set("title", dream.title);
+            //dreamToUpdate.set("description", dream.body);
+
+            doLog("Going to update dream in the PARSE cloud");
+            dreamToUpdate.save(null, {
+                success: function (dreamToUpdate) {
+                    // Now let's update it with some new data. In this case, only cheatMode and score
+                    // will get sent to the cloud. playerName hasn't changed.
+                    dreamToUpdate.set("title", dream.title);
+                    dreamToUpdate.set("description", dream.body);
+                    dreamToUpdate.save();
+                }
+            });
+        }
+        
+    }
+    else {
+        doLog("Going to record dream offLine");
+        //Sometimes you may want to jot down something quickly....
+        if (dream.title == "") dream.title = "[No Title]";
+        dbShell.transaction(function (tx) {
+            if (dream.id == "") tx.executeSql("insert into dreams(title,body,updated) values(?,?,?)", [dream.title, dream.body, new Date()]);
+            else tx.executeSql("update dreams set title=?, body=?, updated=? where id=?", [dream.title, dream.body, new Date(), dream.id]);
+        }, dbErrorHandler, cb);
+    }    
 }
 
 //I just create our initial table - all one of em
@@ -416,9 +509,9 @@ function setupTable(tx) {
 //Think to Organize this JS file
 
 function online() {
-    //return false;
+    return false;
     //PG
-    return PhoneGap.online;
+    //return PhoneGap.online;
     //No PG . . .
-    return navigator.onLine;
+    //return navigator.onLine;
 }
