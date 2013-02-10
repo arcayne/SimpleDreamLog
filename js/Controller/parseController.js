@@ -98,14 +98,16 @@ function logIn(username, password)
 {
     Parse.User.logIn(username, password, {
         success: function (user) {
-            currentUser = user;
-            return true;
+            
+            $.mobile.changePage("main.html", { transition: "slide" });
+
         },
         error: function (user, error) {
             console.log("ERROR!");
             console.dir(error);
+            dbErrorHandler(error);
             $("#loginstatus").html(error.message).addClass("errorDiv");
-            return false;
+            //rtv = false;
         }
     });
 }
@@ -124,15 +126,14 @@ function SignUp(username, password, email)
 
     user.signUp(null, {
         success: function (user) {
-            currentUser = user;
-            return true;
+            $.mobile.changePage("main.html", { transition: "slide" });
         },
         error: function (user, error) {
 
             console.log("ERROR!");
             console.dir(error);
+            dbErrorHandler(error);
             $("#regstatus").html(error.message).addClass("errorDiv");
-            return false;
         }
     });
 }

@@ -265,10 +265,12 @@ function handleLogIn() {
 
     $("#loginstatus").html("<b>Logging in...</b>");
 
-    if (logIn(username, password)) {
+    logIn(username, password);
+
+    /*if (logIn(username, password)) {
         doLog("logIn => Success!");
         $.mobile.changePage("main.html", { transition: "slide" });
-    }
+    }*/
 }
 
 function handleRegister() {
@@ -295,11 +297,13 @@ function handleRegister() {
         return;
     }
 
-    if(SignUp(username, password, email))
+    SignUp(username, password, email);
+
+    /*if(SignUp(username, password, email))
     {
         doLog("SignUp => Success!");
         $.mobile.changePage("main.html", { transition: "slide" });
-    }
+    }*/
 }
 
 
