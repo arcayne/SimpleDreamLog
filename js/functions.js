@@ -154,8 +154,8 @@ function dbErrorHandler(err) {
     }
 }
 
-function phoneReady() {
-    doLog("phoneReady");
+function DeviceReady() {
+    doLog("DeviceReady");
     //First, open our db
 
     dbShell = window.openDatabase("SimpleDreamLog", 2, "SimpleDreamLog", 1000000);
@@ -163,193 +163,26 @@ function phoneReady() {
     //run transaction to create initial tables
     dbShell.transaction(setupTable, dbErrorHandler, getEntries);
     doLog("ran setup");
+
+    AppReady();
 }
 
-//I just create our initial table - all one of em
-function setupTable(tx) {
-    doLog("before execute sql...");
-    tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
-    doLog("after execute sql...");
-}
+function AppReady() {
+    initParse();
 
-//I handle getting entries from the db
-function getEntries() {
-        if (online)
-        {
-            doLog("Going to get entries from Parse");
-            var DreamObject = Parse.Object.extend("dream");
-            
-            var query = new Parse.Query(DreamObject);
-            query.find({
-                success: function (results) {
-                    renderParseEntries(results);
-                },
-                error: dbErrorHandler
-            });
-
-        }
-        else {
-            doLog("get entries");
-            dbShell.transaction(function (tx) {
-                tx.executeSql("select id, title, body, updated from dreams order by updated desc", [], renderEntries, dbErrorHandler);
-            }, dbErrorHandler);
-        }
-}
-
-function renderParseEntries(results) {
-    doLog("render entries");
-    if (results.length == 0) {
-        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
-    } else {
-        var s = "";
-        for (var i = 0, len = results.length; i < len; i++) {
-            var result = results[i];
-           // doLog(result.id);
-            //doLog(result.objectId);
-            /*s += '<p>';
-            s += '<b>ID:</b> ' + result.id + '<br/>';
-            s += 'Created: ' + result.createdAt + '<br/>';
-            s += 'Title: ' + result.attributes.title + '<br/>';
-            s += 'Description: ' + result.attributes.description + '<br/>';
-            s += '</p>';*/
-            
-            s += "<li><a href='dreamLogEntrie.html?id=" + result.id + "'>" + result.attributes.title + "</a></li>";
-        }
-        $("#dreamTitleList").html(s);
-        $("#dreamTitleList").listview("refresh");
-    }
-}
-
-function renderEntries(tx, results) {
-    doLog("render entries");
-    if (results.rows.length == 0) {
-        $("#mainContent").html("<p>You currently do not have any dream recorded.</p>");
-    } else {
-        var s = "";
-        for (var i = 0; i < results.rows.length; i++) {
-            s += "<li><a href='dreamLogEntrie.html?id=" + results.rows.item(i).id + "'>" + results.rows.item(i).title + "</a></li>";
-        }
-        $("#dreamTitleList").html(s);
-        $("#dreamTitleList").listview("refresh");
-    }
+    //Am I logged in already?
+    var loggedIn = AmIalreadyLoggedIn();
+    if (loggedIn) {
+        $.mobile.changePage("main.html", { transition: "slide" });
+    } 
 }
 
 /**
  * Initialize the application
  */
-/*
-function initApplication()
-{
-   $('#set-car-position, #find-car').click(function() {
-      if (checkRequirements() === false)
-      {
-         $(this).removeClass('ui-btn-active');
-         return false;
-      }
-   });
-   $(document).on('pagebeforecreate orientationchange', updateIcons);
-   $('#map-page').live(
-      'pageshow',
-      function()
-      {
-         var requestType = urlParam('requestType');
-         var positionIndex = urlParam('index');
-         var geolocationOptions = {
-            timeout: 15 * 1000, // 15 seconds
-            maximumAge: 10 * 1000, // 10 seconds
-            enableHighAccuracy: true
-         };
-         var position = new Position();
-
-         $.mobile.loading('show');
-         // If the parameter requestType is 'set', the user wants to set
-         // his car position else he want to retrieve the position
-         if (requestType == 'set')
-         {
-            navigator.geolocation.getCurrentPosition(
-               function(location)
-               {
-                  // Save the position in the history log
-                  position.savePosition(
-                     new Coords(
-                        location.coords.latitude,
-                        location.coords.longitude,
-                        location.coords.accuracy
-                     )
-                  );
-                  // Update the saved position to set the address name
-                  Map.requestLocation(location);
-                  Map.displayMap(location, null);
-                  navigator.notification.alert(
-                     'Your position has been saved',
-                     function(){},
-                     'Info'
-                  );
-               },
-               function(error)
-               {
-                  navigator.notification.alert(
-                     'Unable to retrieve your position. Is your GPS enabled?',
-                     function(){
-                        alert("Unable to retrieve the position: " + error.message);
-                     },
-                     'Error'
-                  );
-                  $.mobile.changePage('index.html');
-               },
-               geolocationOptions
-            );
-         }
-         else
-         {
-            if (position.getPositions().length == 0)
-            {
-               navigator.notification.alert(
-                  'You have not set a position',
-                  function(){},
-                  'Error'
-               );
-               $.mobile.changePage('index.html');
-               return false;
-            }
-            else
-            {
-               navigator.geolocation.watchPosition(
-                  function(location)
-                  {
-                     // If positionIndex parameter isn't set, the user wants to retrieve
-                     // the last saved position. Otherwise he accessed the map page
-                     // from the history page, so he wants to see an old position
-                     if (positionIndex == undefined)
-                        Map.displayMap(location, position.getPositions()[0]);
-                     else
-                        Map.displayMap(location, position.getPositions()[positionIndex]);
-                  },
-                  function(error)
-                  {
-                     console.log("Unable to retrieve the position: " + error.message);
-                  },
-                  geolocationOptions
-               );
-            }
-         }
-      }
-   );
-   $('#positions-page').live(
-      'pageinit',
-      function()
-      {
-         createPositionsHistoryList('positions-list', (new Position()).getPositions());
-      }
-   );
-}
-*/
-
-
-function initApplication() {
-    document.addEventListener("deviceready", phoneReady, false);
-
-    Parse.initialize("UVlewktikiK5VltsryjmuxJKyKICSgjcRNNulfFj", "g8pBOeam9isU4txJuWzewaPZJOYhMYcuTzRe5E9f");
+function init() {
+    document.addEventListener("deviceready", DeviceReady, false);
+    //document.addEventListener("deviceready", deviceReady, true);
     
     //handle form submission of a new/old dream
     $("#editDreamForm").live("submit", function (e) {
@@ -358,7 +191,7 @@ function initApplication() {
                     id: $("#dreamId").val()
         };
         savedreamToDB(data, function () {
-            $.mobile.changePage("index.html", { transition: "slide" });
+            $.mobile.changePage("main.html", { transition: "slide" });
         });
         e.preventDefault();
     });
@@ -397,106 +230,78 @@ function initApplication() {
             $("#editFormSubmitButton").removeAttr("disabled");
         }
     });
-}
-
-function getDreamById(id) {
-    doLog("going to get getDreamById by id : " + id);
-    var DreamObject = Parse.Object.extend("dream");
-    var query = new Parse.Query(DreamObject);
     
-    query.get(id,{
-        success: function (result) {
-            $("#dreamId").val(result.id);
-            $("#dreamTitle").val(result.get("title"));
-            $("#dreamBody").val(result.get("description"));
-            $("#editFormSubmitButton").removeAttr("disabled");
-        },
-        error: dbErrorHandler
+    //handle form submission of a new/old dream
+    $("#loginForm").live("submit", function (e) {
+        e.preventDefault();
+        handleLogIn();
+    });
+    
+    $("#registerForm").live("submit", function (e) {
+        e.preventDefault();
+        handleRegister();
     });
 }
 
-
-/**
- * Lets save the dream
- */
-
-/*
-function saveDream()
-{
-    doLog("Into saveDream");
-
-		//get the editable element
-    var editElem = document.getElementById("editDreamForm");
-		
-		//get the edited element content
-		var userVersion = editElem.innerHTML;
-		
-		//save the content to local storage
-		localStorage.userEdits = userVersion;
-		
-		//write a confirmation to the user
-    //document.getElementById("update").innerHTML = "Edits saved!";
+function handleLogIn() {
     
-		var data = {
-		    title: $("#dreamTitle").val(),
-		    body: $("#dreamBody").val(),
-		    id: $("#dreamId").val()
-		};
+    $("#loginstatus").html("").removeClass("errorDiv");
 
-		doLog("The dream is: " + data);
+    //get values
+    var username = $("#username").val();
+    var password = $("#password").val();
 
-		savedreamToDB(data, function () {
-		    $.mobile.changePage("index.html", { transition: "pop" });
-		});
+    doLog("Going to log in user: " + username + " pass:  " + password);
 
-}*/
+    //do some basic validation here
+    var errors = "";
+    if (username === "") errors += "Username required.<br/>";
+    if (password === "") errors += "Password required.<br/>";
 
-function savedreamToDB(dream, cb) {
-    if (online) {
-        //NEW DREAM => INSERT
-        if (dream.id == "")
-        {
-            doLog("Going to record dream online");
-            var DreamObject = Parse.Object.extend("dream");
-            var dreamObject = new DreamObject();
-            dreamObject.save({ title: dream.title, description: dream.body }, {
-                success: function (object) {
-                    alert("yay! it worked");
-                }
-            });
-        }
-        else {//UPDATE
-            // Create the object.
-            var Dream = Parse.Object.extend("dream");
-            var dreamToUpdate = new Dream();
-
-            dreamToUpdate.id = dream.id;
-            //dreamToUpdate.set("title", dream.title);
-            //dreamToUpdate.set("description", dream.body);
-
-            doLog("Going to update dream in the PARSE cloud");
-            dreamToUpdate.save(null, {
-                success: function (dreamToUpdate) {
-                    // Now let's update it with some new data. In this case, only cheatMode and score
-                    // will get sent to the cloud. playerName hasn't changed.
-                    dreamToUpdate.set("title", dream.title);
-                    dreamToUpdate.set("description", dream.body);
-                    dreamToUpdate.save();
-                }
-            });
-        }
-        
+    if (errors !== "") {
+        $("#loginstatus").html(errors).addClass("errorDiv");
+        return;
     }
-    else {
-        doLog("Going to record dream offLine");
-        //Sometimes you may want to jot down something quickly....
-        if (dream.title == "") dream.title = "[No Title]";
-        dbShell.transaction(function (tx) {
-            if (dream.id == "") tx.executeSql("insert into dreams(title,body,updated) values(?,?,?)", [dream.title, dream.body, new Date()]);
-            else tx.executeSql("update dreams set title=?, body=?, updated=? where id=?", [dream.title, dream.body, new Date(), dream.id]);
-        }, dbErrorHandler, cb);
-    }    
+
+    $("#loginstatus").html("<b>Logging in...</b>");
+
+    if (logIn(username, password)) {
+        doLog("logIn => Success!");
+        $.mobile.changePage("main.html", { transition: "slide" });
+    }
 }
+
+function handleRegister() {
+    doLog("handleRegister");
+    var form = $("#registerForm");    
+    //disable the button so we can't resubmit while we wait
+    $("#submitButton",form).attr("disabled","disabled");
+       
+    //get values
+    var username = $("#usernameRegister").val();
+    var password = $("#passwordRegister").val();
+    var email = $("#email").val();
+
+    doLog("Going to register user: " + username + " pass:  " + password + " email: " + email);
+      
+    //do some basic validation here
+    var errors = "";
+    if (username === "") errors += "Username required.<br/>";
+    if (password === "") errors += "Password required.<br/>";
+    if (email === "") errors += "Email required.<br/>";
+
+    if (errors !== "") {
+        $("#regstatus").html(errors).addClass("errorDiv");
+        return;
+    }
+
+    if(SignUp(username, password, email))
+    {
+        doLog("SignUp => Success!");
+        $.mobile.changePage("main.html", { transition: "slide" });
+    }
+}
+
 
 //I just create our initial table - all one of em
 function setupTable(tx) {
@@ -504,9 +309,6 @@ function setupTable(tx) {
     doLog("Going to create the table if it dosent exist");
      tx.executeSql("CREATE TABLE IF NOT EXISTS dreams(id INTEGER PRIMARY KEY,title,body,updated)");
 }
-
-
-//Think to Organize this JS file
 
 function online() {
     return false;

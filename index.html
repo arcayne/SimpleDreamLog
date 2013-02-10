@@ -11,36 +11,44 @@
       <script src="js/jquery.mobile-1.2.0.min.js"></script>
       <script src="js/cordova-2.0.0.js"></script>
       <script src="http://www.parsecdn.com/js/parse-1.2.0.min.js"></script>
-     <!-- <script src="http://maps.google.com/maps/api/js?sensor=true"></script> -->
+      <!-- <script src="http://maps.google.com/maps/api/js?sensor=true"></script> -->
+      <script src="js/Controller/parseController.js"></script>
+      <script src="js/Model/rederController.js"></script>
       <script src="js/functions.js"></script>
-      <!--<script src="js/maps.js"></script> -->
-      <!--<script src="js/positions.js"></script> -->
-      <!--<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
-      <!--<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet"> -->
-      <script>
-         $(document).one('deviceready', initApplication);
-      </script>
+     
    </head>
-    <body>
-        
+    <body onload="init()">
 
-        <div id="homePage" data-role="page">
-            <header data-role="header">
-                <h1>Simple dream log</h1>
-            </header>
-            
-            <div data-role="content" id="mainContent">	
-		        <ul data-role="listview" id="dreamTitleList"></ul>
-	        </div>
-            
+        <div id="loginPage" data-role="page">
+
+            <div data-role="content">    
+
+                <form id="loginForm">
+                    <div data-role="fieldcontain" class="ui-hide-label">
+                        <label for="username">Username:</label>
+                        <input type="text" name="username" id="username" value="" placeholder="Username" />
+                    </div>
+
+                    <div data-role="fieldcontain" class="ui-hide-label">
+                        <label for="password">Password:</label>
+                        <input type="password" name="password" id="password" value="" placeholder="Password" />
+                    </div>
+
+                    <input type="submit" value="Login" id="submitButton">
+                </form>
+        
             <div id="content" data-role="content">
-                <a href="dreamLogEntrie.html" id="newDream" data-role="button">Log a dream</a>
-                <a href="dreamQuery.html" id="findOldDreams" data-role="button">Find your dreams</a>
+                <a href="register.html" id="register" data-role="button">Register</a>
             </div>
+
+            </div>
+            
+            <div id="loginstatus"></div>
+
             <div data-role="footer">
-                <h3>Arcayne Studio</h3>
-                <a href="index.html" data-icon="info" data-iconpos="notext" class="ui-btn-right">Home</a>
+                <h4>&copy; Arcayne Studio</h4>
             </div>
+
         </div>
     </body>
 </html>
